@@ -7,7 +7,7 @@ Application mobile Flutter permettant de consulter les travaux en cours dans la 
 -  **Liste des travaux** : Affichage de tous les travaux en cours à Angers
 -  **Système de favoris** : Sauvegarde locale des travaux favoris avec Hive
 -  **Carte interactive** : Visualisation de votre position sur une carte OpenStreetMap
-- 🚧 **Écran favoris** : En cours de développement
+-  **Écran favoris** : En cours de développement
 
 ##  Technologies utilisées
 
@@ -117,5 +117,4 @@ Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou un
 Ce projet est sous licence MIT.
 
 ##  Auteur
-KABIR SALEH Ibrahim
 Développé dans le cadre d'un projet mobile pour la ville d'Angers.
