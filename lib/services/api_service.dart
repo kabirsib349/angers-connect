@@ -1,44 +1,121 @@
 import '../models/work.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:async';
 
 class ApiService {
 
   final String apiUrl = "https://data.angers.fr/api/explore/v2.1/catalog/datasets/info-travaux/records";
+  
+  // Cache pour les travaux
+  List<Work>? _cachedWorks;
+  DateTime? _cacheTimestamp;
+  final Duration _cacheDuration = const Duration(minutes: 5);
+  
+  // Cache pour les favoris (clé = IDs triés, valeur = résultats)
+  final Map<String, List<Work>> _favoritesCache = {};
+  final Map<String, DateTime> _favoritesCacheTimestamp = {};
 
   Future<List<Work>> fetchWork() async {
+    // Vérifier si le cache est valide
+    if (_cachedWorks != null && _cacheTimestamp != null) {
+      final age = DateTime.now().difference(_cacheTimestamp!);
+      if (age < _cacheDuration) {
+        return _cachedWorks!;
+      }
+    }
+
     try {
-      final response = await http.get(Uri.parse(apiUrl));
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(const Duration(seconds: 10));
+      
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
         final List<dynamic> results = jsonResponse['results'];
         List<Work> works = results.map((jsonWork) => Work.fromJson(jsonWork)).toList();
+        
+        // Mettre en cache
+        _cachedWorks = works;
+        _cacheTimestamp = DateTime.now();
+        
         return works;
       } else {
         throw Exception('Erreur serveur: ${response.statusCode}');
       }
+    } on TimeoutException {
+      throw Exception('Délai d\'attente dépassé. Vérifiez votre connexion.');
+    } on FormatException {
+      throw Exception('Erreur de format des données');
     } catch (e) {
       throw Exception('Erreur de connexion: $e');
     }
   }
+
   Future<List<Work>> fetchWorkById(List<dynamic> ids) async {
     if (ids.isEmpty) {
       return [];
     }
-    final String whereClause = ids.map((id) => 'id = $id').join(' OR ');
-    final Uri url = Uri.parse(
-        '$apiUrl?where=${Uri.encodeComponent(whereClause)}');
-    final response = await http.get(url);
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-      final List<dynamic> results = jsonResponse['results'];
-      List<Work> works = results
-          .map((jsonWork) => Work.fromJson(jsonWork))
-          .toList();
-      return works;
-    } else {
-      throw Exception('Failed to load favorite works from API');
+    // Créer une clé de cache basée sur les IDs triés
+    final sortedIds = List.from(ids)..sort();
+    final cacheKey = sortedIds.join(',');
+
+    // Vérifier le cache
+    if (_favoritesCache.containsKey(cacheKey) && 
+        _favoritesCacheTimestamp.containsKey(cacheKey)) {
+      final age = DateTime.now().difference(_favoritesCacheTimestamp[cacheKey]!);
+      if (age < _cacheDuration) {
+        return _favoritesCache[cacheKey]!;
+      }
     }
+
+    try {
+      final String whereClause = ids.map((id) => 'id = $id').join(' OR ');
+      final Uri url = Uri.parse('$apiUrl?where=${Uri.encodeComponent(whereClause)}');
+      
+      final response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+        final List<dynamic> results = jsonResponse['results'];
+        List<Work> works = results
+            .map((jsonWork) => Work.fromJson(jsonWork))
+            .toList();
+        
+        // Mettre en cache
+        _favoritesCache[cacheKey] = works;
+        _favoritesCacheTimestamp[cacheKey] = DateTime.now();
+        
+        return works;
+      } else {
+        throw Exception('Erreur serveur: ${response.statusCode}');
+      }
+    } on TimeoutException {
+      throw Exception('Délai d\'attente dépassé. Vérifiez votre connexion.');
+    } on FormatException {
+      throw Exception('Erreur de format des données');
+    } catch (e) {
+      throw Exception('Erreur lors du chargement des favoris: $e');
+    }
+  }
+
+  // Méthode pour vider le cache manuellement
+  void clearCache() {
+    _cachedWorks = null;
+    _cacheTimestamp = null;
+    _favoritesCache.clear();
+    _favoritesCacheTimestamp.clear();
+  }
+
+  // Méthode pour vérifier si le cache est valide
+  bool isCacheValid() {
+    if (_cacheTimestamp == null) return false;
+    final age = DateTime.now().difference(_cacheTimestamp!);
+    return age < _cacheDuration;
   }
 }
