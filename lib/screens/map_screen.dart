@@ -6,11 +6,13 @@ import 'package:latlong2/latlong.dart';
 class MapScreen extends StatefulWidget{
   const MapScreen({super.key});
 
+  @override
   State<MapScreen> createState() => _MapScreenState();
 }
 
 class _MapScreenState extends State<MapScreen>{
 
+  final MapController _mapController = MapController();
   String _message = "En cours de chargement...";
   Position? _currentPosition;
 
@@ -51,18 +53,60 @@ class _MapScreenState extends State<MapScreen>{
       Position position = await Geolocator.getCurrentPosition();
       setState(() {
         _currentPosition = position;
-        _message =
-        'Latitude: ${position.latitude}\nLongitude: ${position.longitude}';
+        _message = '';
       });
-    }catch(e){
-
+    } catch(e) {
+      setState(() {
+        _message = "Erreur lors de la récupération de la position: $e";
+      });
     }
   }
+
+  @override
   Widget build(BuildContext context){
     return Scaffold(
       body: _currentPosition == null
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: _message.isEmpty
+                  ? const CircularProgressIndicator()
+                  : Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.location_off,
+                            size: 64,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            _message,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          if (_message.contains("paramètres"))
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16.0),
+                              child: ElevatedButton(
+                                onPressed: () => Geolocator.openLocationSettings(),
+                                child: const Text("Ouvrir les paramètres"),
+                              ),
+                            ),
+                          if (!_message.contains("definitivement") && !_message.contains("paramètres"))
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16.0),
+                              child: ElevatedButton(
+                                onPressed: _determinePosition,
+                                child: const Text("Réessayer"),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+            )
           : FlutterMap(
+              mapController: _mapController,
               options: MapOptions(
                   initialCenter:
                     LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
@@ -71,6 +115,7 @@ class _MapScreenState extends State<MapScreen>{
               children: [
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.example.angers_connect',
                 ),
                 MarkerLayer(
                   markers: [
@@ -87,7 +132,19 @@ class _MapScreenState extends State<MapScreen>{
                   ],
                 ),
               ]
+            ),
+      floatingActionButton: _currentPosition != null
+          ? FloatingActionButton(
+              onPressed: () {
+                _mapController.move(
+                  LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+                  14.0,
+                );
+              },
+              tooltip: 'Recentrer sur ma position',
+              child: const Icon(Icons.my_location),
             )
+          : null,
     );
   }
 }

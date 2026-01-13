@@ -13,7 +13,13 @@ class MainScreen extends StatefulWidget{
 
 class _MainScreenState extends State<MainScreen>{
   int _selectedIndex = 0;
-  static List<Widget> _widgetoptions = <Widget>[HomeScreen(), MapScreen(), FavoritesScreen()];
+  
+  // Widgets créés une seule fois et conservés en mémoire
+  final List<Widget> _screens = const [
+    HomeScreen(),
+    MapScreen(),
+    FavoritesScreen(),
+  ];
 
   void _onItemTapped(int index){
     setState(() {
@@ -21,13 +27,15 @@ class _MainScreenState extends State<MainScreen>{
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Angers Connect'),
       ),
-      body: Center(
-        child: _widgetoptions.elementAt(_selectedIndex),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _screens,
       ),
       bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
@@ -48,6 +56,7 @@ class _MainScreenState extends State<MainScreen>{
           onTap: _onItemTapped,
           selectedItemColor: Colors.amber[800],
       ),
+      floatingActionButton: null,
     );
   }
 }
