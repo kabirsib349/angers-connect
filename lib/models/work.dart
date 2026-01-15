@@ -39,6 +39,7 @@ class Work {
       longitude: lng,
 
 
+
     );
     return work;
   }
