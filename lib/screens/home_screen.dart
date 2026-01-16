@@ -15,6 +15,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late Future<List<Work>> _works;
   ApiService apiService = ApiService();
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
 
   @override
   void initState() {
@@ -63,45 +66,122 @@ class _HomeScreenState extends State<HomeScreen> {
             return const Center(child: Text('Aucun travail à afficher'));
           }
           return ValueListenableBuilder(
+            //  Écoute les changements dans la box Hive "favorites"
             valueListenable: Hive.box('favorites').listenable(),
             builder: (context, box, widget) {
-              return ListView.builder(
-                itemCount: works.length,
-                itemBuilder: (context, index) {
-                  Work work = works[index];
-                  final bool isFavorite = box.containsKey(work.id);
-                  return ListTile(
-                    leading: const Icon(Icons.construction, color: Colors.orange),
-                    title: Text(work.title),
-                    subtitle: Text(work.description),
-                    isThreeLine: true,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => WorkDetailScreen(work: work),
+
+              //  FILTRAGE DES CHANTIERS SELON LA RECHERCHE
+              final filteredWorks = works.where((work) {
+                final query = _searchQuery.toLowerCase();
+
+                // Recherche dans le titre OU la description
+                return work.title.toLowerCase().contains(query) ||
+                    work.description.toLowerCase().contains(query);
+              }).toList();
+
+              return Column(
+                children: [
+
+                  //  BARRE DE RECHERCHE
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Rechercher un chantier...',
+                        prefixIcon: const Icon(Icons.search),
+
+                        //  Bouton pour effacer la recherche
+                        suffixIcon: _searchQuery.isNotEmpty
+                            ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() {
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                            : null,
+
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      );
-                    },
-                    trailing: IconButton(
-                      icon: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavorite ? Colors.red : null,
                       ),
-                      onPressed: () {
-                        if (isFavorite) {
-                          box.delete(work.id);
-                        } else {
-                          box.put(work.id, true);
-                        }
+
+                      // 📝 Mise à jour de la recherche en temps réel
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                        });
                       },
                     ),
-                  );
+                  ),
 
-                },
+
+                  Expanded(
+                    child: filteredWorks.isEmpty
+
+                        ? const Center(
+                      child: Text("Aucun chantier trouvé."),
+                    )
+
+
+                        : ListView.builder(
+                      itemCount: filteredWorks.length,
+                      itemBuilder: (context, index) {
+                        final work = filteredWorks[index];
+
+
+                        final bool isFavorite = box.containsKey(work.id);
+
+                        return ListTile(
+                          leading: const Icon(
+                            Icons.construction,
+                            color: Colors.orange,
+                          ),
+
+                          title: Text(work.title),
+                          subtitle: Text(work.description),
+                          isThreeLine: true,
+
+                          // 👉 Navigation vers le détail du chantier
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    WorkDetailScreen(work: work),
+                              ),
+                            );
+                          },
+
+
+                          trailing: IconButton(
+                            icon: Icon(
+                              isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: isFavorite ? Colors.red : null,
+                            ),
+                            onPressed: () {
+
+                              if (isFavorite) {
+                                box.delete(work.id);
+                              } else {
+                                box.put(work.id, true);
+                              }
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               );
             },
           );
+
         }
         return const Center(child: Text("Aucun travail à afficher."));
       },
