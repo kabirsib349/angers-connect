@@ -4,7 +4,6 @@ class Work {
   final String description;
   final DateTime startAt;
   final DateTime endAt;
-  //Ajout coordonnées
   final double? latitude;
   final double? longitude;
 
@@ -19,9 +18,8 @@ class Work {
     this.longitude,
   });
 
-
-
   factory Work.fromJson(Map<String, dynamic> json) {
+
     double? lat;
     double? lng;
     if (json['geo_point_2d'] != null && json['geo_point_2d'] is List && json['geo_point_2d'].length == 2) {
@@ -37,9 +35,6 @@ class Work {
       endAt: DateTime.parse(json['endat']),
       latitude: lat,
       longitude: lng,
-
-
-
     );
     return work;
   }
