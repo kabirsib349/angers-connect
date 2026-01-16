@@ -22,9 +22,21 @@ class Work {
 
     double? lat;
     double? lng;
-    if (json['geo_point_2d'] != null && json['geo_point_2d'] is List && json['geo_point_2d'].length == 2) {
-      lat = (json['geo_point_2d'][0] as num).toDouble();
-      lng = (json['geo_point_2d'][1] as num).toDouble();
+    // 1️⃣ Cas geo_point_2d
+    if (json['geo_point_2d'] != null) {
+      lat = json['geo_point_2d']['lat'];
+      lng = json['geo_point_2d']['lon'];
+    }
+
+    // 2️⃣ Fallback geo_shape
+    else if (json['geo_shape'] != null &&
+        json['geo_shape']['geometry'] != null &&
+        json['geo_shape']['geometry']['coordinates'] != null) {
+      final coords = json['geo_shape']['geometry']['coordinates'];
+      if (coords is List && coords.length >= 2) {
+        lng = coords[0];
+        lat = coords[1];
+      }
     }
 
     Work work = Work(
