@@ -22,13 +22,13 @@ class Work {
 
     double? lat;
     double? lng;
-    // 1️⃣ Cas geo_point_2d
+    // Cas geo_point_2d
     if (json['geo_point_2d'] != null) {
       lat = json['geo_point_2d']['lat'];
       lng = json['geo_point_2d']['lon'];
     }
 
-    // 2️⃣ Fallback geo_shape
+    //  Fallback geo_shape
     else if (json['geo_shape'] != null &&
         json['geo_shape']['geometry'] != null &&
         json['geo_shape']['geometry']['coordinates'] != null) {

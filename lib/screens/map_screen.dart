@@ -3,7 +3,7 @@ import "package:geolocator/geolocator.dart";
 import "package:flutter_map/flutter_map.dart";
 import 'package:latlong2/latlong.dart';
 
-// ⬇ AJOUT : import du modèle Work
+// AJOUT : import du modèle Work
 import '../models/work.dart';
 
 // AJOUT : service d’appel API
@@ -33,10 +33,10 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
 
-    // 🔹 Code existant (GPS)
+    // Code existant (GPS)
     _determinePosition();
 
-    // ⬇ AJOUT : chargement des travaux dès l’ouverture de la carte
+    // AJOUT : chargement des travaux dès l’ouverture de la carte
     _loadWorks();
   }
 

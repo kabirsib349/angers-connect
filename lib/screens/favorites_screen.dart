@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import "package:hive_flutter/hive_flutter.dart";
 
 import '../models/work.dart';
+import 'work_detail_screen.dart';
+
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -120,14 +122,22 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       title: Text(work.title),
                       subtitle: Text(work.description),
                       isThreeLine: true,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => WorkDetailScreen(work: work),
+                          ),
+                        );
+                      },
                       trailing: IconButton(
                         icon: const Icon(Icons.favorite, color: Colors.red),
                         onPressed: () {
-                          // Retirer des favoris
                           box.delete(work.id);
                         },
                       ),
                     );
+
                   },
                 );
               }

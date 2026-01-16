@@ -2,6 +2,8 @@ import "package:flutter/material.dart";
 import "package:hive_flutter/hive_flutter.dart";
 import "../models/work.dart";
 import "../services/api_service.dart";
+import 'work_detail_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -73,6 +75,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     title: Text(work.title),
                     subtitle: Text(work.description),
                     isThreeLine: true,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => WorkDetailScreen(work: work),
+                        ),
+                      );
+                    },
                     trailing: IconButton(
                       icon: Icon(
                         isFavorite ? Icons.favorite : Icons.favorite_border,
@@ -87,6 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                   );
+
                 },
               );
             },
