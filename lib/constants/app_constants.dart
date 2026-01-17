@@ -11,7 +11,7 @@ class AppConstants {
   static const String favoritesBoxName = 'favorites';
   
   // Asset Paths
-  static const String logoPath = 'assets/images/logo.png'; // À ajouter si nécessaire
+  static const String logoPath = 'assets/images/logo.png'; 
   
   // Messages d'erreur
   static const String errorConnection = "Problème de connexion internet.";
