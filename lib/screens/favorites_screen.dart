@@ -1,153 +1,286 @@
-import 'package:angers_connect/services/api_service.dart';
 import 'package:flutter/material.dart';
-import "package:hive_flutter/hive_flutter.dart";
+import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
+import '../providers/favorites_provider.dart';
 import '../models/work.dart';
+import '../theme/theme.dart';
 import 'work_detail_screen.dart';
-
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
-  
+
   @override
   State<FavoritesScreen> createState() => _FavoritesScreenState();
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
-  final ApiService apiService = ApiService();
-  Future<List<Work>>? _favoritesFuture;
-  List<dynamic> _lastFavoriteIds = [];
-
   @override
   void initState() {
     super.initState();
-    _loadFavorites();
-  }
-
-  void _loadFavorites() {
-    final box = Hive.box('favorites');
-    final favoriteIds = box.keys.toList();
-    
-    // Ne recharger que si les IDs ont changé
-    if (!_listsEqual(_lastFavoriteIds, favoriteIds)) {
-      setState(() {
-        _lastFavoriteIds = List.from(favoriteIds);
-        _favoritesFuture = apiService.fetchWorkById(favoriteIds);
-      });
-    }
-  }
-
-  bool _listsEqual(List a, List b) {
-    if (a.length != b.length) return false;
-    final sortedA = List.from(a)..sort();
-    final sortedB = List.from(b)..sort();
-    for (int i = 0; i < sortedA.length; i++) {
-      if (sortedA[i] != sortedB[i]) return false;
-    }
-    return true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<FavoritesProvider>().loadFavorites();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ValueListenableBuilder(
-        valueListenable: Hive.box('favorites').listenable(),
-        builder: (context, box, child) {
-          // Différer le rechargement après la phase de build
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _loadFavorites();
-          });
+      extendBodyBehindAppBar: true,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(80),
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: AppTheme.primaryGradient,
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+          ),
+          child: SafeArea(
+            child: Center(
+              child: Text(
+                'Mes Favoris',
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      body: Consumer<FavoritesProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-          return FutureBuilder<List<Work>>(
-            future: _favoritesFuture,
-            builder: (context, snapshot) {
-              if(snapshot.connectionState == ConnectionState.waiting){
-                return const Center(child: CircularProgressIndicator());
-              }else if(snapshot.hasError){
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.error_outline, color: Colors.red, size: 60),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Erreur: ${snapshot.error}',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              _favoritesFuture = apiService.fetchWorkById(_lastFavoriteIds);
-                            });
-                          },
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Réessayer'),
-                        ),
-                      ],
+          if (provider.error != null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 60),
+                  const SizedBox(height: 16),
+                  Text(provider.error!),
+                  ElevatedButton(
+                    onPressed: () => provider.loadFavorites(),
+                    child: const Text('Réessayer'),
+                  )
+                ],
+              ),
+            );
+          }
+
+          if (provider.favoriteWorks.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                   Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.favorite_border, size: 60, color: Colors.grey[400]),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    "Aucun favori pour le moment",
+                    style: GoogleFonts.poppins(
+                      fontSize: 18, 
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textDark
                     ),
                   ),
-                );
-              }else if(snapshot.hasData){
-                final List<Work> works = snapshot.data!;
-                if(works.isEmpty){
-                  return const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.favorite_border, size: 64, color: Colors.grey),
-                        SizedBox(height: 16),
-                        Text(
-                          "Vous n'avez aucun favori.",
-                          style: TextStyle(fontSize: 18),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          "Ajoutez des travaux en favoris depuis l'accueil",
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-                return ListView.builder(
-                  itemCount: works.length,
-                  itemBuilder: (context, index){
-                    final Work work = works[index];
-                    return ListTile(
-                      leading: const Icon(Icons.construction, color: Colors.orange),
-                      title: Text(work.title),
-                      subtitle: Text(work.description),
-                      isThreeLine: true,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => WorkDetailScreen(work: work),
-                          ),
-                        );
-                      },
-                      trailing: IconButton(
-                        icon: const Icon(Icons.favorite, color: Colors.red),
-                        onPressed: () {
-                          box.delete(work.id);
-                        },
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: Text(
+                      "Ajoutez des travaux en favoris en cliquant sur le cœur dans la liste ou les détails.",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 14, 
+                        color: AppTheme.textLight
                       ),
-                    );
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
 
-                  },
-                );
-              }
-              return const Center(child: Text("Aucun favori."));
-            },
+          return Column(
+            children: [
+              const SizedBox(height: 100),
+              // En-tête avec bouton tout supprimer
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "${provider.favoriteWorks.length} favoris enregistrés",
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textLight,
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: () => _confirmDeleteAll(context),
+                      icon: const Icon(Icons.delete_outline, size: 20, color: AppTheme.accentColor),
+                      label: Text(
+                        "Tout supprimer", 
+                        style: GoogleFonts.inter(color: AppTheme.accentColor)
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              Expanded(
+                child: AnimationLimiter(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    itemCount: provider.favoriteWorks.length,
+                    itemBuilder: (context, index) {
+                      final work = provider.favoriteWorks[index];
+                      return AnimationConfiguration.staggeredList(
+                        position: index,
+                        duration: const Duration(milliseconds: 375),
+                        child: SlideAnimation(
+                          verticalOffset: 50.0,
+                          child: FadeInAnimation(
+                            child: Dismissible(
+                              key: Key(work.id.toString()),
+                              direction: DismissDirection.endToStart,
+                              background: Container(
+                                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.accentColor,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.only(right: 20),
+                                child: const Icon(Icons.delete, color: Colors.white),
+                              ),
+                              onDismissed: (direction) {
+                                provider.toggleFavorite(work);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("${work.title} retiré des favoris"),
+                                    duration: const Duration(seconds: 2),
+                                    action: SnackBarAction(
+                                      label: 'Annuler',
+                                      onPressed: () => provider.toggleFavorite(work),
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: _buildFavoriteCard(context, work),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
           );
         },
       ),
     );
   }
+
+  Widget _buildFavoriteCard(BuildContext context, Work work) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      elevation: 4,
+      shadowColor: Colors.black.withOpacity(0.1),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => WorkDetailScreen(work: work)),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.secondaryColor.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.construction,
+                  color: AppTheme.secondaryColor,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      work.title,
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textDark,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      work.description,
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: AppTheme.textLight,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: Colors.grey),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _confirmDeleteAll(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Tout supprimer ?"),
+        content: const Text("Voulez-vous vraiment supprimer tous vos favoris ?"),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Annuler"),
+          ),
+          TextButton(
+            onPressed: () {
+              context.read<FavoritesProvider>().removeAllFavorites();
+              Navigator.pop(ctx);
+            },
+            child: const Text("Supprimer", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
 }
-
-
