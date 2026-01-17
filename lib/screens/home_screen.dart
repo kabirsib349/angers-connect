@@ -109,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
 
-                      // 📝 Mise à jour de la recherche en temps réel
+                      //  Mise à jour de la recherche en temps réel
                       onChanged: (value) {
                         setState(() {
                           _searchQuery = value;
@@ -145,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           subtitle: Text(work.description),
                           isThreeLine: true,
 
-                          // 👉 Navigation vers le détail du chantier
+                          //  Navigation vers le détail du chantier
                           onTap: () {
                             Navigator.push(
                               context,
