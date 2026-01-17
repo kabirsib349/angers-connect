@@ -66,10 +66,10 @@ class AppTheme {
       ),
 
       // Thème des Cards
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: surfaceColor,
         elevation: 2,
-        shadowColor: Colors.black.withOpacity(0.05),
+        shadowColor: Colors.black.withValues(alpha: 0.05),
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -110,7 +110,7 @@ class AppTheme {
           borderSide: const BorderSide(color: secondaryColor, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        hintStyle: GoogleFonts.inter(color: textLight.withOpacity(0.5)),
+        hintStyle: GoogleFonts.inter(color: textLight.withValues(alpha: 0.5)),
       ),
       
       // Icônes

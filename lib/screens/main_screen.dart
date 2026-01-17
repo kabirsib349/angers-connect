@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 
 import 'home_screen.dart';
 import 'favorites_screen.dart';
@@ -44,7 +44,7 @@ class _MainScreenState extends State<MainScreen> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, -5),
             ),
@@ -56,7 +56,7 @@ class _MainScreenState extends State<MainScreen> {
             selectedIndex: _selectedIndex,
             onDestinationSelected: _onItemTapped,
             backgroundColor: Colors.white,
-            indicatorColor: AppTheme.secondaryColor.withOpacity(0.1),
+            indicatorColor: AppTheme.secondaryColor.withValues(alpha: 0.1),
             labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
             destinations: [
               const NavigationDestination(

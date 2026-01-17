@@ -54,7 +54,7 @@ class _MapScreenState extends State<MapScreen> {
             borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
              boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, 5),
               ),
@@ -103,7 +103,7 @@ class _MapScreenState extends State<MapScreen> {
                       ),
                       child: Container(
                          decoration: BoxDecoration(
-                          color: AppTheme.accentColor.withOpacity(0.3),
+                          color: AppTheme.accentColor.withValues(alpha: 0.3),
                           shape: BoxShape.circle,
                          ),
                          child: Center(
@@ -251,7 +251,7 @@ class _MapScreenState extends State<MapScreen> {
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: AppTheme.secondaryColor.withOpacity(0.1),
+                        color: AppTheme.secondaryColor.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(Icons.construction, color: AppTheme.secondaryColor),

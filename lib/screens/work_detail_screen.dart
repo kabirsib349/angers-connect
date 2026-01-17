@@ -21,7 +21,7 @@ class WorkDetailScreen extends StatelessWidget {
         leading: Container(
           margin: const EdgeInsets.only(left: 8, top: 8),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             shape: BoxShape.circle,
           ),
           child: IconButton(
@@ -51,7 +51,7 @@ class WorkDetailScreen extends StatelessWidget {
                     child: Icon(
                       Icons.construction, 
                       size: 300, 
-                      color: Colors.white.withOpacity(0.1)
+                      color: Colors.white.withValues(alpha: 0.1)
                     ),
                   ),
                   
@@ -110,7 +110,7 @@ class WorkDetailScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 5),
                         ),
@@ -188,9 +188,9 @@ class WorkDetailScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.secondaryColor.withOpacity(0.05),
+        color: AppTheme.secondaryColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.secondaryColor.withOpacity(0.1)),
+        border: Border.all(color: AppTheme.secondaryColor.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
