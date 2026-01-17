@@ -203,25 +203,29 @@ class WorkDetailScreen extends StatelessWidget {
             child: const Icon(Icons.location_on, color: AppTheme.secondaryColor),
           ),
           const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Localisation",
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textDark,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Localisation",
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textDark,
+                  ),
                 ),
-              ),
-              Text(
-                "Lat: $lat, Lng: $lng",
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: AppTheme.textLight,
+                Text(
+                  "Lat: $lat, Lng: $lng",
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: AppTheme.textLight,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
