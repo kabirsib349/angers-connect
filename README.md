@@ -94,13 +94,8 @@ class Work {
 }
 ```
 
-##  Captures d'écran
-
-_À venir_
-
 ##  Fonctionnalités à venir
 
-- [ ] Implémenter l'écran des favoris complet
 - [ ] Afficher les travaux sur la carte avec des marqueurs
 - [ ] Filtrer les travaux par date/statut
 - [ ] Notifications pour les nouveaux travaux
@@ -108,13 +103,3 @@ _À venir_
 - [ ] Recherche de travaux
 - [ ] Détails complets d'un travail
 
-##  Contribution
-
-Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une pull request.
-
-##  Licence
-
-Ce projet est sous licence MIT.
-
-##  Auteur
-Développé dans le cadre d'un projet mobile pour la ville d'Angers.
