@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import '../constants/app_constants.dart';
 
 class LocationProvider with ChangeNotifier {
   Position? _currentPosition;
@@ -22,7 +23,7 @@ class LocationProvider with ChangeNotifier {
       // 1. Vérifier si le service est activé
       _serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!_serviceEnabled) {
-        _error = "Le service de localisation est désactivé.";
+        _error = AppConstants.locationServiceDisabled;
         return;
       }
 
@@ -31,13 +32,13 @@ class LocationProvider with ChangeNotifier {
       if (_permission == LocationPermission.denied) {
         _permission = await Geolocator.requestPermission();
         if (_permission == LocationPermission.denied) {
-          _error = "Permission de localisation refusée.";
+          _error = AppConstants.locationPermissionDenied;
           return;
         }
       }
 
       if (_permission == LocationPermission.deniedForever) {
-        _error = "Permission refusée définitivement. Veuillez l'activer dans les paramètres.";
+        _error = AppConstants.locationPermissionDeniedForever;
         return;
       }
 
@@ -45,7 +46,7 @@ class LocationProvider with ChangeNotifier {
       _currentPosition = await Geolocator.getCurrentPosition();
       
     } catch (e) {
-      _error = "Erreur lors de la localisation: $e";
+      _error = "${AppConstants.locationErrorPrefix}$e";
     } finally {
       _isLoading = false;
       notifyListeners();

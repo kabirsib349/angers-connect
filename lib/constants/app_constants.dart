@@ -19,6 +19,12 @@ class AppConstants {
   static const String errorTimeout = "Le délai d'attente est dépassé.";
   static const String errorGeneral = "Une erreur est survenue.";
   
+  // Location Errors
+  static const String locationServiceDisabled = "Le service de localisation est désactivé.";
+  static const String locationPermissionDenied = "Permission de localisation refusée.";
+  static const String locationPermissionDeniedForever = "Permission refusée définitivement. Veuillez l'activer dans les paramètres.";
+  static const String locationErrorPrefix = "Erreur lors de la localisation: ";
+  
   // Textes UI
   static const String appTitle = "Angers Connect";
   static const String searchHint = "Rechercher un chantier...";

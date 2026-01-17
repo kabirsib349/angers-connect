@@ -1,16 +1,17 @@
 import '../models/work.dart';
+import '../constants/app_constants.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 
 class ApiService {
 
-  final String apiUrl = "https://data.angers.fr/api/explore/v2.1/catalog/datasets/info-travaux/records";
+  final String apiUrl = AppConstants.worksEndpoint;
   
   // Cache pour les travaux
   List<Work>? _cachedWorks;
   DateTime? _cacheTimestamp;
-  final Duration _cacheDuration = const Duration(minutes: 5);
+  static const Duration _cacheDuration = Duration(minutes: AppConstants.cacheDurationMinutes);
   
   // Cache pour les favoris (clé = IDs triés, valeur = résultats)
   final Map<String, List<Work>> _favoritesCache = {};
@@ -29,11 +30,11 @@ class ApiService {
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: AppConstants.timeoutSeconds));
       
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        final List<dynamic> results = jsonResponse['results'];
+        final results = jsonResponse['results'] as List<dynamic>;
         List<Work> works = results.map((jsonWork) => Work.fromJson(jsonWork)).toList();
         
         // Mettre en cache
@@ -42,14 +43,14 @@ class ApiService {
         
         return works;
       } else {
-        throw Exception('Erreur serveur: ${response.statusCode}');
+        throw Exception('${AppConstants.errorServer} (Code: ${response.statusCode})');
       }
     } on TimeoutException {
-      throw Exception('Délai d\'attente dépassé. Vérifiez votre connexion.');
+      throw Exception(AppConstants.errorTimeout);
     } on FormatException {
-      throw Exception('Erreur de format des données');
+      throw Exception(AppConstants.errorGeneral);
     } catch (e) {
-      throw Exception('Erreur de connexion: $e');
+      throw Exception('${AppConstants.errorConnection}: $e');
     }
   }
 
@@ -78,11 +79,11 @@ class ApiService {
       final response = await http.get(
         url,
         headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: AppConstants.timeoutSeconds));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        final List<dynamic> results = jsonResponse['results'];
+        final results = jsonResponse['results'] as List<dynamic>;
         List<Work> works = results
             .map((jsonWork) => Work.fromJson(jsonWork))
             .toList();
@@ -93,14 +94,14 @@ class ApiService {
         
         return works;
       } else {
-        throw Exception('Erreur serveur: ${response.statusCode}');
+        throw Exception('${AppConstants.errorServer} (Code: ${response.statusCode})');
       }
     } on TimeoutException {
-      throw Exception('Délai d\'attente dépassé. Vérifiez votre connexion.');
+      throw Exception(AppConstants.errorTimeout);
     } on FormatException {
-      throw Exception('Erreur de format des données');
+      throw Exception(AppConstants.errorGeneral);
     } catch (e) {
-      throw Exception('Erreur lors du chargement des favoris: $e');
+      throw Exception('${AppConstants.errorConnection}: $e');
     }
   }
 

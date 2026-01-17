@@ -139,7 +139,7 @@ class WorkDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    work.description,
+                    work.description.isNotEmpty ? work.description : "Aucune description disponible",
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       color: AppTheme.textLight,

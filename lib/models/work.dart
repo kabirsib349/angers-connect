@@ -19,35 +19,31 @@ class Work {
   });
 
   factory Work.fromJson(Map<String, dynamic> json) {
-
     double? lat;
     double? lng;
+    
     // Cas geo_point_2d
     if (json['geo_point_2d'] != null) {
-      lat = json['geo_point_2d']['lat'];
-      lng = json['geo_point_2d']['lon'];
+      lat = (json['geo_point_2d']['lat'] as num).toDouble();
+      lng = (json['geo_point_2d']['lon'] as num).toDouble();
     }
-
     //  Fallback geo_shape
-    else if (json['geo_shape'] != null &&
-        json['geo_shape']['geometry'] != null &&
-        json['geo_shape']['geometry']['coordinates'] != null) {
+    else if (json['geo_shape']?['geometry']?['coordinates'] != null) {
       final coords = json['geo_shape']['geometry']['coordinates'];
       if (coords is List && coords.length >= 2) {
-        lng = coords[0];
-        lat = coords[1];
+        lng = (coords[0] as num).toDouble();
+        lat = (coords[1] as num).toDouble();
       }
     }
 
-    Work work = Work(
-      id: json['id'],
-      title: json['title'],
-      description: json['description'],
-      startAt: DateTime.parse(json['startat']),
-      endAt: DateTime.parse(json['endat']),
+    return Work(
+      id: json['id'] as int? ?? 0,
+      title: json['title'] as String? ?? 'Sans titre',
+      description: json['description'] as String? ?? 'Aucune description',
+      startAt: DateTime.tryParse(json['startat'] ?? '') ?? DateTime.now(),
+      endAt: DateTime.tryParse(json['endat'] ?? '') ?? DateTime.now(),
       latitude: lat,
       longitude: lng,
     );
-    return work;
   }
 }

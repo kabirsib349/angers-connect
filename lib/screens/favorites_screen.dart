@@ -6,6 +6,7 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../providers/favorites_provider.dart';
 import '../models/work.dart';
 import '../theme/theme.dart';
+import '../constants/app_constants.dart';
 import 'work_detail_screen.dart';
 
 class FavoritesScreen extends StatefulWidget {
@@ -87,7 +88,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    "Aucun favori pour le moment",
+                    AppConstants.noFavorites,
                     style: GoogleFonts.poppins(
                       fontSize: 18, 
                       fontWeight: FontWeight.w600,
@@ -98,7 +99,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 40),
                     child: Text(
-                      "Ajoutez des travaux en favoris en cliquant sur le cœur dans la liste ou les détails.",
+                      AppConstants.addFavoritesHint,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize: 14, 
